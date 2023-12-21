@@ -1,8 +1,7 @@
+from PyQt6.QtCore import pyqtSignal
 from PyQt6.QtWidgets import (QWidget, QVBoxLayout, QLabel,
                              QPushButton, QPlainTextEdit, QLineEdit,
                              QHBoxLayout)
-
-from PyQt6.QtCore import pyqtSignal
 
 
 class ClickablePlainTextEdit(QPlainTextEdit):
@@ -24,6 +23,7 @@ class RawDataTab(QWidget):
         # Create and add widgets to the layout
         self.text_area = ClickablePlainTextEdit()
         self.text_area.setReadOnly(True)
+        self.text_area.setMaximumBlockCount(50)
         self.raw_data_layout.addWidget(QLabel("Raw Data:"))
         self.raw_data_layout.addWidget(self.text_area)
 
