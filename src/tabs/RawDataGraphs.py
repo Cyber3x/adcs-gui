@@ -9,6 +9,8 @@ class RawDataGraphs(QWidget):
     def __init__(self, parent):
         super().__init__(parent)
 
+        self.state = State()
+
         self.layout_main = QVBoxLayout(self)
 
         self.angle_plot = pg.PlotWidget()
@@ -27,7 +29,7 @@ class RawDataGraphs(QWidget):
 
         self.gyroscope_plot = pg.PlotWidget()
         self.gyroscope_plot.showGrid(True, True)
-        self.gyroscope_plot.setLabel('left', 'Angular velocity', 'rad/s')
+        self.gyroscope_plot.setLabel('left', 'Angular velocity', 'deg/s')
         self.gyroscope_plot.setBackground('transparent')
         self.gyroscope_plot.enableAutoRange('y', True)
         self.layout_main.addWidget(self.gyroscope_plot)
@@ -39,7 +41,6 @@ class RawDataGraphs(QWidget):
         self.temperature_plot.enableAutoRange('y', True)
         self.layout_main.addWidget(self.temperature_plot)
 
-        self.state = State()
         self.state.IMU_angle_data.add_callback(self.update_angle_plot)
         self.state.IMU_acceleration_data.add_callback(self.update_acceleration_plot)
         self.state.IMU_gyroscope_data.add_callback(self.update_gyroscope_plot)

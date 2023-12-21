@@ -178,7 +178,12 @@ class SerialCommunicationTab(QWidget):
                                  .replace(",", "")
                                  .split(" ")[1:]
                                  )
-                self.state.add_IMU_acceleration_datapoint(*map(float, accelerations))
+                self.state.add_IMU_acceleration_datapoint(
+                    *map(
+                        lambda x: x * 9.81,
+                        map(float, accelerations)
+                    )
+                )
 
             elif line.startswith("angle"):
                 # input line format:
