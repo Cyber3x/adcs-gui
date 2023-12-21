@@ -34,6 +34,8 @@ class MainWindow(QMainWindow):
         self.tabs.setCurrentIndex(3)
         self.setCentralWidget(self.tabs)
 
+        self.serial_communication_tab.refresh_com_ports()
+
     def handle_text_changed(self):
         print(self.serial_communication_tab.text_area.toPlainText())
 

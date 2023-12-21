@@ -1,15 +1,16 @@
 import sys
+
+from PyQt6.QtGui import QTextCursor
+from PyQt6.QtSerialPort import QSerialPort, QSerialPortInfo
 from PyQt6.QtWidgets import (QWidget, QVBoxLayout, QHBoxLayout,
                              QComboBox, QLabel, QPushButton,
                              QPlainTextEdit)
-from PyQt6.QtSerialPort import QSerialPort, QSerialPortInfo
-from PyQt6.QtGui import QTextCursor
 
-#from ..main import MainWindow
+from stores.GlobalStore import State
 
 
 class SerialCommunicationTab(QWidget):
-    def __init__(self, parent = None):
+    def __init__(self, parent=None):
         super().__init__()
         self.parent = parent
 
@@ -93,6 +94,10 @@ class SerialCommunicationTab(QWidget):
 
         self.serial_port: QSerialPort = QSerialPort()
 
+        self.add_angle_datapoints = State().add_IMU_angle_datapoint
+
+        self.data = bytearray()
+
     def refresh_com_ports(self):
         print("Refreshing COM Ports")
 
@@ -103,6 +108,11 @@ class SerialCommunicationTab(QWidget):
 
         for port in available_ports:
             self.com_port_dropdown.addItem(port.portName())
+
+            if port.portName() == "rfcomm0":
+                self.com_port_dropdown.setCurrentText("rfcomm0")
+
+            self.open_port()
 
     def open_port(self):
         port_name = self.com_port_dropdown.currentText()
@@ -136,24 +146,46 @@ class SerialCommunicationTab(QWidget):
             self.text_area.clear()
             self.text_area.appendPlainText("Port opened")
             self.serial_port.readyRead.connect(self.read_data)
+
+            # clear data
+            self.data = bytearray()
         else:
             self.text_area.appendPlainText("Port failed to open")
             print("Port failed to open")
 
     def read_data(self):
-        if self.serial_port.canReadLine():
-            data_bytes = self.serial_port.readLine().data()
-            data = data_bytes.decode().strip()
+        self.data += self.serial_port.readAll().data()
+        lines = self.data.split(b"\n")
 
-            self.update_text_area(data)
+        # Process all complete lines
+        # Ignore the last line as it might be incomplete
+        for line_bytes in lines[:-1]:
+            try:
+                line = line_bytes.decode().strip()
+            except UnicodeDecodeError:
+                print(line_bytes)
+                print("UnicodeDecodeError")
+                continue
 
-            first_space_index = data.find(' ')
-            if data[:first_space_index] == "angle":
-                data = data[first_space_index + 1:].replace("(", "").replace(")", "")
-                [x, y, z] = data.split(',')
-                self.parent.controls_tab.axis_controls["X"].update_graph_data(float(x))
-                self.parent.controls_tab.axis_controls["Y"].update_graph_data(float(y))
-                self.parent.controls_tab.axis_controls["Z"].update_graph_data(float(z))
+            self.update_text_area(line)
+
+            if line.startswith("temp"):
+                temp = float(line.split(" ")[1])
+
+            elif line.startswith("angle"):
+                # input line format:
+                # angle (x, y, z)
+                angles = (line
+                          .replace("(", "")
+                          .replace(")", "")
+                          .replace(",", "")
+                          .split(" ")[1:]
+                          )
+                self.add_angle_datapoints(*map(float, angles))
+                self.parent.controls_tab.update_graphs()
+
+        # Keep the incomplete line for the next iteration
+        self.data = lines[-1]
 
     def write_data(self, data: str):
         if self.serial_port.isOpen():
@@ -180,12 +212,3 @@ class SerialCommunicationTab(QWidget):
             self.text_area.moveCursor(QTextCursor.MoveOperation.End)
         else:
             self.text_area.appendPlainText("No port is open")
-
-    def update_plot(self, data):
-        numbers = data.strip().split(',')
-        if numbers:
-            first_numer = float(numbers[0])
-        else:
-            first_numer = 0.0
-
-        self.parent.primitive_control_tab.update_graph(first_numer)

@@ -1,16 +1,10 @@
-from dataclasses import dataclass
-
 import pyqtgraph as pg
 from PyQt6.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout
-from modules.AxisControls import AxisState, AxisControls
 
-@dataclass
-class State:
-    axis_data = {
-        "X": AxisState(),
-        "Y": AxisState(),
-        "Z": AxisState(),
-    }
+from modules.AxisControls import AxisControls
+from stores.GlobalStore import State
+
+axes = ["X", "Y", "Z"]
 
 
 class ControlsTab(QWidget):
@@ -36,13 +30,15 @@ class ControlsTab(QWidget):
 
         self.layout_axis_controls: QHBoxLayout = QHBoxLayout()
 
-        axes = ["X", "Y", "Z"]
-
         for axis in axes:
-            axis_controller = AxisControls(axis_name=axis, state=self.state.axis_data[axis], parent=self)
+            axis_controller = AxisControls(axis_name=axis, parent=self)
             self.axis_controls[axis] = axis_controller
             self.layout_axis_controls.addWidget(axis_controller)
 
         self.layout_main_vertical.addLayout(self.layout_axis_controls)
 
         self.setLayout(self.layout_main_vertical)
+
+    def update_graphs(self):
+        for axis in axes:
+            self.axis_controls[axis].update_graph()
