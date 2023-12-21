@@ -1,13 +1,12 @@
-from hmac import new
-
+from PyQt6.QtCore import Qt
 from PyQt6.QtWidgets import (QWidget, QVBoxLayout, QHBoxLayout,
-                             QLabel, QBoxLayout, QSlider,
+                             QLabel, QSlider,
                              QPushButton, QLineEdit)
-from PyQt6.QtCore import Qt, QTimer
-from validators.DoubleValidator import DoubleValidator
-from stores.GlobalStore import State
+
 from core.communication import send_command
-from utils.debounce_timer import create_debounce_timer
+from stores.GlobalStore import State
+from utils.utils import create_debounce_timer
+from validators.DoubleValidator import DoubleValidator
 
 axes = ["X", "Y", "Z"]
 stepper_value_slider_scalar = 10

@@ -2,9 +2,7 @@ import pyqtgraph as pg
 from PyQt6.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout
 
 from modules.AxisControls import AxisControls
-from stores.GlobalStore import State
-
-axes = ["X", "Y", "Z"]
+from stores.GlobalStore import State, IMU_Data_Dict, axes
 
 
 class ControlsTab(QWidget):
@@ -38,7 +36,8 @@ class ControlsTab(QWidget):
         self.layout_main_vertical.addLayout(self.layout_axis_controls)
 
         self.setLayout(self.layout_main_vertical)
+        self.state.IMU_angle_data.add_callback(self.update_graphs)
 
-    def update_graphs(self):
+    def update_graphs(self, IMU_angle_data: IMU_Data_Dict):
         for axis in axes:
-            self.axis_controls[axis].update_graph()
+            self.axis_controls[axis].update_graph(IMU_angle_data[axis])

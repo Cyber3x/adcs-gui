@@ -1,12 +1,12 @@
 import math
 
+import numpy as np
 import pyqtgraph as pg
 from PyQt6.QtCore import Qt
 from PyQt6.QtWidgets import (QWidget, QVBoxLayout, QHBoxLayout,
                              QLabel, QPushButton, QSlider,
                              QLineEdit)
 
-from stores.GlobalStore import State
 from validators.DoubleValidator import DoubleValidator
 from validators.IntValidator import IntValidator
 
@@ -103,15 +103,13 @@ class AxisControls(QWidget):
 
         self.setLayout(layout_main_vertical)
 
-        self.get_IMU_angle_data = State().get_IMU_angle_data
-
-    def update_graph(self):
+    def update_graph(self, angle_datapoints: np.ndarray):
         self.angular_velocity_plot.clear()
 
         pen_color_real_data = ["r", "g", "b"][["X", "Y", "Z"].index(self.axis_name)]
 
         pen = pg.mkPen(color=pen_color_real_data)
-        self.angular_velocity_plot.plot(self.get_IMU_angle_data()[self.axis_name], pen=pen)
+        self.angular_velocity_plot.plot(angle_datapoints, pen=pen)
 
     def callback_angular_velocity_changed(self, value):
         self.rotation_rate_slider.setValue(int(value * 100))
