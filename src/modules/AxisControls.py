@@ -7,18 +7,18 @@ from PyQt6.QtWidgets import (QWidget, QVBoxLayout, QHBoxLayout,
                              QLabel, QPushButton, QSlider,
                              QLineEdit)
 
-from v2.src.core.ObservableProperty import create_observable_property
-from v2.src.validators.DoubleValidator import DoubleValidator
-from v2.src.validators.IntValidator import IntValidator
-from v2.src.widgets.SeparatorLine import SeparatorLine
+from core.ObservableValue import create_observable_value
+from validators.DoubleValidator import DoubleValidator
+from validators.IntValidator import IntValidator
+from widgets.SeparatorLine import SeparatorLine
 
 MAX_NUM_OF_DATAPOINTS = 200
 
 
 class AxisState:
     def __init__(self):
-        self.angle = create_observable_property(0)  # rad
-        self.angular_velocity = create_observable_property(0.0)  # rad/
+        self.angle = create_observable_value(0)  # rad
+        self.angular_velocity = create_observable_value(0.0)  # rad/
         self.angular_velocity_datapoints_real = np.zeros(200)
         # self.angular_velocity_datapoints_target = np.zeros(MAX_NUM_OF_DATAPOINTS)
 
@@ -30,10 +30,6 @@ class AxisControls(QWidget):
         self.state = state
         self.parent = parent
 
-        # fixme: remove this
-        self.current_ang_velocity = 0.0
-        self.current_ang_acc = 0.01
-
         layout_main_vertical = QVBoxLayout()
         layout_main_vertical.setContentsMargins(10, 0, 10, 0)
         layout_main_vertical.setAlignment(Qt.AlignmentFlag.AlignTop)
@@ -44,34 +40,6 @@ class AxisControls(QWidget):
         axis_name_label.setFont(font)
         axis_name_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
         layout_main_vertical.addWidget(axis_name_label)
-
-        stepper_label = QLabel("Stepper control")
-        stepper_label.setContentsMargins(0, 20, 0, 10)
-        stepper_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        layout_main_vertical.addWidget(stepper_label)
-
-        center_button = QPushButton("Center")
-        layout_main_vertical.addWidget(center_button)
-
-        move_stepper_label = QLabel("Move stepper [steps]")
-        move_stepper_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        layout_main_vertical.addWidget(move_stepper_label)
-
-        # ---- STEPPER CONTROLS LAYOUT START ----
-        layout_stepper_controls = QHBoxLayout()
-
-        self.stepper_move_steps_input = QLineEdit()
-        self.stepper_move_steps_input.returnPressed.connect(self.handle_send_move_command_button_clicked)
-        layout_stepper_controls.addWidget(self.stepper_move_steps_input)
-
-        stepper_send_move_command = QPushButton("Move")
-        stepper_send_move_command.clicked.connect(self.handle_send_move_command_button_clicked)
-        layout_stepper_controls.addWidget(stepper_send_move_command)
-
-        layout_main_vertical.addLayout(layout_stepper_controls)
-        # ---- STEPPER CONTROLS LAYOUT END ----
-
-        layout_main_vertical.addWidget(SeparatorLine(shape='horizontal'))
 
         flywheel_label = QLabel("Flywheel control")
         flywheel_label.setContentsMargins(0, 20, 0, 10)

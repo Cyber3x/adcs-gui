@@ -9,11 +9,11 @@ class DoubleValidator(QDoubleValidator):
         self.max_value = max_value
         self.number_of_decimals = number_of_decimals
 
-    def fixup(self, input_str):
-        return input_str
+    # def fixup(self, input_str):
+    #     return input_str
 
     def validate(self, input_str, pos):
-        if input_str == "" or input_str == "-":
+        if input_str == "" or (input_str == "-" and self.min_value < 0):
             return QDoubleValidator.State.Acceptable, input_str, pos
         try:
             value = float(input_str)
