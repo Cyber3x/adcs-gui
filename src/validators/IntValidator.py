@@ -12,7 +12,7 @@ class IntValidator(QIntValidator):
         return input_str
 
     def validate(self, input_str, pos):
-        if input_str == "" or input_str == "-":
+        if input_str == "" or (input_str == "-" and self.min_value < 0):
             return QIntValidator.State.Acceptable, input_str, pos
         try:
             value = int(input_str)
