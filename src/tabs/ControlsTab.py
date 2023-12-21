@@ -2,8 +2,7 @@ from dataclasses import dataclass
 
 import pyqtgraph as pg
 from PyQt6.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout
-from v2.src.modules.AxisControls import AxisControls, AxisState
-
+from modules.AxisControls import AxisState, AxisControls
 
 @dataclass
 class State:
@@ -12,16 +11,6 @@ class State:
         "Y": AxisState(),
         "Z": AxisState(),
     }
-
-# class TestState:
-#     _instance: TestState = None
-#
-#     def __new__(cls, *args, **kwargs):
-#         if cls._instance is None:
-#             cls._instance = super(TestState, cls).__new__(cls, *args, **kwargs)
-#         return cls._instance
-#
-
 
 
 class ControlsTab(QWidget):

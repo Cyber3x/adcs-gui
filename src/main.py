@@ -3,10 +3,10 @@ import sys
 import PyQt6.QtGui as QtGui
 from PyQt6.QtWidgets import (QMainWindow, QApplication, QTabWidget)
 
-from tabs.BasicControls import BasicControls
 from tabs.ControlsTab import ControlsTab
 from tabs.RawDataTab import RawDataTab
 from tabs.SerialCommunicationTab import SerialCommunicationTab
+from tabs.StepperCalibrationTab import StepperCalibrationTab
 
 
 class MainWindow(QMainWindow):
@@ -25,8 +25,8 @@ class MainWindow(QMainWindow):
         self.raw_data_tab = RawDataTab(self)
         self.tabs.addTab(self.raw_data_tab, "Raw Data")
 
-        self.basic_controls_tab = BasicControls(self)
-        self.tabs.addTab(self.basic_controls_tab, "Basic Controls")
+        self.stepper_calibration_tab = StepperCalibrationTab(self)
+        self.tabs.addTab(self.stepper_calibration_tab, "Stepper Calibration")
 
         self.controls_tab = ControlsTab(self)
         self.tabs.addTab(self.controls_tab, "Controls")
@@ -38,7 +38,7 @@ class MainWindow(QMainWindow):
         print(self.serial_communication_tab.text_area.toPlainText())
 
     def init_ui(self):
-        self.setWindowTitle('ADCS Communcation GUI')
+        self.setWindowTitle('ADCS GUI')
         self.setMinimumSize(800, 600)
         self.setGeometry(0, 0, 1270, 720)
         self.center()

@@ -20,7 +20,7 @@ class Observable(Generic[T]):
             callback(value)
 
 
-class ObservableProperty(Observable[T]):
+class ObservableValue(Observable[T]):
     def __init__(self, default_value: T, name: str = None):
         super().__init__()
         self._value: T = default_value
@@ -38,6 +38,6 @@ class ObservableProperty(Observable[T]):
         return self._name
 
 
-def create_observable_property(default_value: T, name: str = None) -> ObservableProperty[T]:
-    observable_prop = ObservableProperty(default_value, name)
+def create_observable_value(default_value: T, name: str = None) -> ObservableValue[T]:
+    observable_prop = ObservableValue(default_value, name)
     return observable_prop
