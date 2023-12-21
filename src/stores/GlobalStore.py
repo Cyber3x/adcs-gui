@@ -7,9 +7,10 @@ from utils.utils import append_to_array
 
 # custom types
 Axis = Literal["X", "Y", "Z"]
+Axes = List[Axis]
 IMU_Data_Dict = Dict[Axis, np.ndarray]
 
-axes: List[Axis] = ["X", "Y", "Z"]
+axes: Axes = ["X", "Y", "Z"]
 
 # TODO: move this to some settings state
 # there's a default value but it can be changed wiht a command
