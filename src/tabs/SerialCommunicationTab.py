@@ -7,6 +7,7 @@ from PyQt6.QtWidgets import (QWidget, QVBoxLayout, QHBoxLayout,
                              QPlainTextEdit)
 
 from stores.GlobalStore import State
+from utils.parsing import parse_input_line
 
 
 class SerialCommunicationTab(QWidget):
@@ -111,7 +112,7 @@ class SerialCommunicationTab(QWidget):
             if port.portName() == "rfcomm0":
                 self.com_port_dropdown.setCurrentText("rfcomm0")
 
-            self.open_port()
+        self.open_port()
 
     def open_port(self):
         port_name = self.com_port_dropdown.currentText()
@@ -153,61 +154,19 @@ class SerialCommunicationTab(QWidget):
             print("Port failed to open")
 
     def read_data(self):
+        # accumulate new data to the old one
         self.data += self.serial_port.readAll().data()
         lines = self.data.split(b"\n")
 
         # Process all complete lines
         # Ignore the last line as it might be incomplete
         for line_bytes in lines[:-1]:
+            line = parse_input_line(line_bytes, self.state)
 
-            # TODO: move parser into new object
-
-            try:
-                line = line_bytes.decode().strip()
-            except UnicodeDecodeError:
-                print(line_bytes)
-                print("UnicodeDecodeError")
+            if not line:
                 continue
 
             self.update_text_area(line)
-
-            if line.startswith("acc"):
-                accelerations = (line
-                                 .replace("(", "")
-                                 .replace(")", "")
-                                 .replace(",", "")
-                                 .split(" ")[1:]
-                                 )
-                self.state.add_IMU_acceleration_datapoint(
-                    *map(
-                        lambda x: x * 9.81,
-                        map(float, accelerations)
-                    )
-                )
-
-            elif line.startswith("angle"):
-                # input line format:
-                # angle (x, y, z)
-                angles = (line
-                          .replace("(", "")
-                          .replace(")", "")
-                          .replace(",", "")
-                          .split(" ")[1:]
-                          )
-                self.state.add_IMU_angle_datapoint(*map(float, angles))
-
-            elif line.startswith("gyro"):
-                angular_velocities = (line
-                                      .replace("(", "")
-                                      .replace(")", "")
-                                      .replace(",", "")
-                                      .split(" ")[1:]
-                                      )
-                self.state.add_IMU_gyroscope_datapoint(*map(float, angular_velocities))
-
-            elif line.startswith("temp"):
-                temp = float(line.split(" ")[1])
-                self.state.add_IMU_temperature_datapoint(temp)
 
         # Keep the incomplete line for the next iteration
         self.data = lines[-1]
