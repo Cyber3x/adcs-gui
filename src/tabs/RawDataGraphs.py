@@ -49,14 +49,14 @@ class RawDataGraphs(QWidget):
             self.gyroscope_plot: self.state.IMU_gyroscope_data.data,
         }
 
-        self.axis_plot_lines = {}
+        self.axis_plot_lines: Dict[pg.PlotWidget, Dict[Axis, pg.PlotItem]] = {}
 
-        for plot, data in self.axis_plot_lines.items():
+        for plot, data in self.axis_plots.items():
             self.axis_plot_lines[plot] = {}
             for axis, axis_data in data.items():
                 pen_color = ['r', 'g', 'b'][axes.index(axis)]
                 pen = pg.mkPen(color=pen_color)
-                self.plot_lines[plot][axis] = plot.plot(axis_data, pen=pen)
+                self.axis_plot_lines[plot][axis] = plot.plot(axis_data, pen=pen)
 
         self.state.IMU_angle_data.add_callback(self.update_angle_plot)
         self.state.IMU_acceleration_data.add_callback(self.update_acceleration_plot)
@@ -67,7 +67,7 @@ class RawDataGraphs(QWidget):
 
     def _update_plot_lines(self, plot: pg.PlotWidget, IMU_data_dict: IMU_Data_Dict):
         for axis, data in IMU_data_dict.items():
-            self.plot_lines[plot][axis].setData(data)
+            self.axis_plot_lines[plot][axis].setData(data)
 
     def update_angle_plot(self, IMU_angle_data: IMU_Data_Dict):
         self._update_plot_lines(self.angle_plot, IMU_angle_data)

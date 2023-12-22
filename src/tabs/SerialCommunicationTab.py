@@ -111,7 +111,7 @@ class SerialCommunicationTab(QWidget):
             if port.portName() == "rfcomm0":
                 self.com_port_dropdown.setCurrentText("rfcomm0")
 
-            self.open_port()
+        self.open_port()
 
     def open_port(self):
         port_name = self.com_port_dropdown.currentText()
