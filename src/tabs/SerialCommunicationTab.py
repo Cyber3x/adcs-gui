@@ -1,4 +1,5 @@
 import sys
+import time
 
 from PyQt6.QtGui import QTextCursor
 from PyQt6.QtSerialPort import QSerialPort, QSerialPortInfo
@@ -106,13 +107,17 @@ class SerialCommunicationTab(QWidget):
         # get list of available ports
         available_ports: list[QSerialPortInfo] = QSerialPortInfo.availablePorts()
 
+        found = False
         for port in available_ports:
             self.com_port_dropdown.addItem(port.portName())
 
             if port.portName() == "rfcomm0":
                 self.com_port_dropdown.setCurrentText("rfcomm0")
+                found = True
 
-        self.open_port()
+        if found:
+            time.sleep(0.5)
+            self.open_port()
 
     def open_port(self):
         port_name = self.com_port_dropdown.currentText()

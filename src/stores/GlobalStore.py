@@ -58,7 +58,7 @@ class State:
     # So here 2000ms = 2s of data will be displayed on graphs
     # TODO: this can be changed in a config
     # watch out that when the time shrinks the np array needs to be resized
-    IMU_data_history_length_ms = 2000
+    IMU_data_history_length_ms = 5000
 
     IMU_max_number_of_datapoints = int(IMU_data_history_length_ms / data_interval_delay_ms)
 

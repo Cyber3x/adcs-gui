@@ -91,7 +91,7 @@ class _StepperControls(QWidget):
         # center button
         self.center_command_button = QPushButton("Center")
         self.center_command_button.clicked.connect(
-            lambda: send_command(f"stepper {axes.index(self.axis_name)} center")
+            lambda: self.stepper_value.set(50)
         )
         self.layout_main.addWidget(self.center_command_button)
 

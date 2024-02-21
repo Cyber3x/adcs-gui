@@ -18,6 +18,27 @@ python main.py
 connect the GUI to your ADCS over bluetooth. Refresh COM ports and select your correction. Enter the correct settings and open the port.
 Now the GUI is connected to your ADCS.
 
+### Linux
+
+If you are using Linux, you need to create a rfcomm device to connect to your ADCS.
+this can be done by following these steps:
+
+1. Turn on your bluetooth and pair with your ADCS
+2. Find the MAC address of your ADCS by running the following command
+
+```bash
+hcitool scan
+```
+
+3. Create a rfcomm device by running the following command
+
+```bash
+sudo rfcomm bind 0 <MAC address of your ADCS>
+```
+
+*`bind 0` refers to device number 0 (rfcomm0) and 1 is the channel*
+
+4. You can now connect to your ADCS using the rfcomm device in the GUI
 
 ## Glosary
 * **ADCS** - Attitude Determination and Control System

@@ -1,4 +1,3 @@
-import pyqtgraph as pg
 from PyQt6.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout
 
 from modules.AxisControls import AxisControls
@@ -16,13 +15,6 @@ class ControlsTab(QWidget):
         self.layout_main_vertical: QVBoxLayout = QVBoxLayout(self)
 
         self.layout_data_display: QHBoxLayout = QHBoxLayout()
-
-        main_plot = pg.PlotWidget()
-        main_plot.showGrid(True, True)
-        main_plot.setLabel('left', 'Angle', 'deg')
-        main_plot.setBackground('transparent')
-        main_plot.setYRange(0, 90)
-        self.layout_data_display.addWidget(main_plot)
 
         self.layout_main_vertical.addLayout(self.layout_data_display)
 
