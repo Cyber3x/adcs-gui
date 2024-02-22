@@ -2,7 +2,7 @@ from typing import Dict, List, Callable, Literal
 
 import numpy as np
 
-from core.ObservableValue import create_observable_value, ObservableValue
+from core.ObservableValue import create_observable_value
 from utils.utils import append_to_array
 
 # custom types
@@ -45,14 +45,33 @@ class IMUDataTemperature:
         return self._callbacks
 
 
+class StepperValues:
+    def __init__(self):
+        self.X = create_observable_value(0, "stepper_value_X")
+        self.Y = create_observable_value(0, "stepper_value_Y")
+        self.Z = create_observable_value(0, "stepper_value_Z")
+
+    def reprJSON(self):
+        return {
+            "stepper_values": {
+                "X": self.X,
+                "Y": self.Y,
+                "Z": self.Z,
+            }
+        }
+
+    # TODO: can this be better, how can i ensure that my data is of the correct type
+    # maybe i can move the json validation to here and then just call the update method
+    def update(self, data):
+        self.X.set(data["stepper_values"]["X"])
+        self.Y.set(data["stepper_values"]["Y"])
+        self.Z.set(data["stepper_values"]["Z"])
+
+
 class State:
     _instance = None
 
-    stepper_values: Dict[Axis, ObservableValue] = {
-        "X": create_observable_value(0, "stepper_value_X"),
-        "Y": create_observable_value(0, "stepper_value_Y"),
-        "Z": create_observable_value(0, "stepper_value_Z"),
-    }
+    stepper_values = StepperValues()
 
     # The length of the IMU data history in milliseconds
     # So here 2000ms = 2s of data will be displayed on graphs

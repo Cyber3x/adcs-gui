@@ -35,7 +35,7 @@ class MainWindow(QMainWindow):
         self.controls_tab = ControlsTab(self)
         self.tabs.addTab(self.controls_tab, "Controls")
 
-        self.tabs.setCurrentIndex(3)
+        self.tabs.setCurrentIndex(2)
         self.setCentralWidget(self.tabs)
 
         self.serial_communication_tab.refresh_com_ports()

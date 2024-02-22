@@ -1,16 +1,116 @@
+import json
+import os.path
+
 from PyQt6.QtCore import Qt
+from PyQt6.QtGui import QAction
 from PyQt6.QtWidgets import (QWidget, QVBoxLayout, QHBoxLayout,
-                             QLabel, QSlider,
-                             QPushButton, QLineEdit)
+                             QLabel, QSlider, QMessageBox,
+                             QPushButton, QLineEdit, QFileDialog)
+from jsonschema import validate, ValidationError
 
 from core.communication import send_command
 from stores.GlobalStore import State
-from utils.utils import create_debounce_timer
+from utils.utils import create_debounce_timer, action_to_button, custom_JSON_encoder
 from validators.DoubleValidator import DoubleValidator
+from validators.schemas import stepper_values_schema
 
 axes = ["X", "Y", "Z"]
 stepper_value_slider_scalar = 10
 debounce_timer_ms = 300
+
+
+class StepperCalibrationTab(QWidget):
+    def __init__(self, parent=None):
+        super().__init__(parent=parent)
+
+        self.parent = parent
+
+        self.layout_main = QVBoxLayout(self)
+        self.layout_main.setAlignment(Qt.AlignmentFlag.AlignTop)
+        self.layout_main.setSpacing(10)
+
+        self.layout_main.addLayout(self.create_toolbar())
+
+        self.layout_stepper_controls = QHBoxLayout()
+
+        for axis in axes:
+            stepper_controls = _StepperControls(axis_name=axis, parent=self)
+            self.layout_stepper_controls.addWidget(stepper_controls)
+
+        self.layout_main.addLayout(self.layout_stepper_controls)
+
+        self.setLayout(self.layout_main)
+
+    def create_toolbar(self):
+        toolbar = QHBoxLayout()
+        toolbar.setAlignment(Qt.AlignmentFlag.AlignLeft)
+
+        save_stepper_values_action = QAction("Save values")
+        save_stepper_values_action.triggered.connect(self.save_stepper_values_file)
+        save_stepper_values_action.setShortcut("Ctrl+S")
+
+        open_stepper_values_action = QAction("Open values")
+        open_stepper_values_action.triggered.connect(self.open_stepper_values_file)
+        open_stepper_values_action.setShortcut("Ctrl+O")
+
+        toolbar.addWidget(action_to_button(open_stepper_values_action))
+        toolbar.addWidget(action_to_button(save_stepper_values_action))
+
+        return toolbar
+
+    def save_stepper_values_file(self):
+        filters = "JavaScript Object Notation (*.json)"
+        filename, selected_filter = QFileDialog.getSaveFileName(
+            self,
+            caption="Save stepper values",
+            directory="stepper_values.json",
+            filter=filters,
+            initialFilter=filters,
+        )
+
+        if not filename:
+            return
+
+        with open(filename, "w") as f:
+            json.dump(State().stepper_values, f, default=custom_JSON_encoder, indent=4)
+
+    def open_stepper_values_file(self):
+        caption = "Open stepper values"  # Empty uses default caption
+        inital_dir = ""  # Empty uses current folder
+        filters = "JavaScript Object Notation (*.json)"
+        initial_filter = "All files (*.*)"
+
+        filename, selected_filter = QFileDialog.getOpenFileName(
+            self,
+            caption=caption,
+            directory=inital_dir,
+            filter=filters,
+            initialFilter=initial_filter,
+        )
+
+        if not filename or not os.path.isfile(filename):
+            return
+
+        with open(filename, "r") as f:
+            data = json.load(f)
+
+        try:
+            validate(data, stepper_values_schema)
+            print("Valid JSON")
+        except ValidationError as e:
+            print(e)
+            QMessageBox.critical(
+                self,
+                "Invalid JSON",
+                f"{e.message}\n\n"
+                "The format of the JSON file is invalid. Thus, the file cannot be opened.\nYou can try to fix the "
+                "file manually or create a new one.",
+                buttons=QMessageBox.StandardButton.Ok,
+                defaultButton=QMessageBox.StandardButton.Ok,
+            )
+            return
+
+        State().stepper_values.update(data)
 
 
 class _StepperControls(QWidget):
@@ -20,10 +120,11 @@ class _StepperControls(QWidget):
         self.axis_name = axis_name
         self.parent = parent
 
-        self.stepper_value = State().stepper_values[axis_name]
+        self.stepper_value = getattr(State().stepper_values, axis_name)
 
         self.layout_main = QVBoxLayout(self)
         self.layout_main.setAlignment(Qt.AlignmentFlag.AlignTop)
+        self.layout_main.setContentsMargins(0, 0, 0, 0)
 
         # Axis name label
         self.label_axis_name = QLabel(f"{axis_name}")
@@ -121,23 +222,3 @@ class _StepperControls(QWidget):
         self.stepper_value.set(new_value)
 
         self.debounce_timer.start()
-
-
-class StepperCalibrationTab(QWidget):
-    def __init__(self, parent=None):
-        super().__init__(parent=parent)
-
-        self.parent = parent
-
-        self.layout_main = QVBoxLayout(self)
-        self.layout_main.setAlignment(Qt.AlignmentFlag.AlignTop)
-
-        self.layout_stepper_controls = QHBoxLayout()
-
-        for axis in axes:
-            stepper_controls = _StepperControls(axis_name=axis, parent=self)
-            self.layout_stepper_controls.addWidget(stepper_controls)
-
-        self.layout_main.addLayout(self.layout_stepper_controls)
-
-        self.setLayout(self.layout_main)

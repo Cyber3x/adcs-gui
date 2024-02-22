@@ -1,4 +1,3 @@
-import sys
 import time
 
 from PyQt6.QtGui import QTextCursor
@@ -57,11 +56,6 @@ class SerialCommunicationTab(QWidget):
 
         # setup stop bits options
         stop_bits = [1, 2]
-
-        # 1.5 bits is only supported on windows
-        # https://doc.qt.io/qt-6/qserialport.html#StopBits-enum
-        if sys.platform == 'win32':
-            stop_bits.index(1.5, 1)
 
         self.stop_bits_dropdown = QComboBox()
         self.stop_bits_dropdown.addItems(map(str, stop_bits))

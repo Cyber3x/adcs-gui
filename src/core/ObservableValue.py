@@ -1,7 +1,5 @@
 from typing import TypeVar, Generic, Callable, List
 
-from PyQt6.QtCore import pyqtSignal
-
 T = TypeVar('T')
 
 
@@ -36,6 +34,9 @@ class ObservableValue(Observable[T]):
 
     def get_name(self) -> str:
         return self._name
+
+    def reprJSON(self):
+        return self._value
 
 
 def create_observable_value(default_value: T, name: str = None) -> ObservableValue[T]:
