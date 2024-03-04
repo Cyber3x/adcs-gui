@@ -1,18 +1,16 @@
 import json
 import os.path
+from json.decoder import JSONDecodeError
 
 from PyQt6.QtCore import Qt
 from PyQt6.QtGui import QAction
-from PyQt6.QtWidgets import (QWidget, QVBoxLayout, QHBoxLayout,
-                             QLabel, QSlider, QMessageBox,
-                             QPushButton, QLineEdit, QFileDialog)
-from jsonschema import validate, ValidationError
+from PyQt6.QtWidgets import (QWidget, QVBoxLayout, QHBoxLayout, QMessageBox,
+                             QLabel, QSlider, QPushButton, QLineEdit, QFileDialog)
 
 from core.communication import send_command
 from stores.GlobalStore import State
 from utils.utils import create_debounce_timer, action_to_button, custom_JSON_encoder
 from validators.DoubleValidator import DoubleValidator
-from validators.schemas import stepper_values_schema
 
 axes = ["X", "Y", "Z"]
 stepper_value_slider_scalar = 10
@@ -92,25 +90,32 @@ class StepperCalibrationTab(QWidget):
             return
 
         with open(filename, "r") as f:
-            data = json.load(f)
+            try:
+                data = json.load(f)
+            except JSONDecodeError as e:
+                print("json error")
+                QMessageBox.critical(
+                    self,
+                    title="Invalid JSON",
+                    text=f"{e.msg}",
+                    buttons=QMessageBox.StandardButton.Ok,
+                    defaultButton=QMessageBox.StandardButton.Ok,
+                )
+                return
 
-        try:
-            validate(data, stepper_values_schema)
-            print("Valid JSON")
-        except ValidationError as e:
-            print(e)
+        validation_error = State().stepper_values.update(data)
+
+        if validation_error:
+            print("validation error")
             QMessageBox.critical(
                 self,
-                "Invalid JSON",
-                f"{e.message}\n\n"
-                "The format of the JSON file is invalid. Thus, the file cannot be opened.\nYou can try to fix the "
-                "file manually or create a new one.",
+                title="Invalid JSON",
+                text=f"{validation_error.message}\n\n"
+                     "The format of the JSON file is invalid. Thus, the file cannot be opened.\nYou can try to fix the "
+                     "file manually or create a new one.",
                 buttons=QMessageBox.StandardButton.Ok,
                 defaultButton=QMessageBox.StandardButton.Ok,
             )
-            return
-
-        State().stepper_values.update(data)
 
 
 class _StepperControls(QWidget):

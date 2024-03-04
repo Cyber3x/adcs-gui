@@ -1,9 +1,11 @@
-from typing import Dict, List, Callable, Literal
+from typing import Dict, List, Callable, Literal, Optional
 
 import numpy as np
+from jsonschema import validate, ValidationError
 
 from core.ObservableValue import create_observable_value
 from utils.utils import append_to_array
+from validators.schemas import stepper_values_schema
 
 # custom types
 Axis = Literal["X", "Y", "Z"]
@@ -60,12 +62,27 @@ class StepperValues:
             }
         }
 
-    # TODO: can this be better, how can i ensure that my data is of the correct type
-    # maybe i can move the json validation to here and then just call the update method
-    def update(self, data):
-        self.X.set(data["stepper_values"]["X"])
-        self.Y.set(data["stepper_values"]["Y"])
-        self.Z.set(data["stepper_values"]["Z"])
+    # TODO: should we validate the data before every update?
+    # could this be a performance hit? for now probably not but something to thing about
+    # TODO: if the motors can't move in parallel we need too add delay in order to move them sequentially
+
+    def update(self, new_data: str) -> Optional[ValidationError]:
+        """
+        Update the stepper values from a json string
+
+        :param new_data: a json string with the stepper values
+
+        :return: None if the data is valid, ValidationError if the data is invalid
+        """
+
+        try:
+            validate(new_data, stepper_values_schema)
+        except ValidationError as e:
+            return e
+
+        self.X.set(new_data["stepper_values"]["X"])
+        self.Y.set(new_data["stepper_values"]["Y"])
+        self.Z.set(new_data["stepper_values"]["Z"])
 
 
 class State:
