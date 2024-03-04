@@ -21,8 +21,15 @@ Now the GUI is connected to your ADCS.
 ### Linux
 
 If you are using Linux, you need to create a rfcomm device to connect to your ADCS.
-this can be done by following these steps:
+this can be done by running the following script or by following the steps below.
 
+Script:
+
+```bash
+sudo ./create-rfcomm-port-linux.sh
+```
+
+Manual steps:
 1. Turn on your bluetooth and pair with your ADCS
 2. Find the MAC address of your ADCS by running the following command
 
