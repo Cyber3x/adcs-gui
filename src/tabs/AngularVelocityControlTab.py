@@ -4,7 +4,7 @@ from modules.AxisControls import AxisControls
 from stores.GlobalStore import State, IMU_Data_Dict, axes
 
 
-class ControlsTab(QWidget):
+class AngularVelocityControlTab(QWidget):
     def __init__(self, parent):
         super().__init__()
         self.parent = parent

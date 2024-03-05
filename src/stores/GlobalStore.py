@@ -85,10 +85,45 @@ class StepperValues:
         self.Z.set(new_data["stepper_values"]["Z"])
 
 
+class DCMotorValues:
+    MAX_ANGULAR_VELOCITY = 2  # rads/sec
+    MIN_ANGULAR_VELOCITY = -2  # rads/sec
+
+    def __init__(self):
+        self.angular_velocity_control = {
+            "tuning_paramiters": {
+                "P": create_observable_value(0, "angular_velocity_P"),
+                "I": create_observable_value(0, "angular_velocity_I"),
+                "D": create_observable_value(0, "angular_velocity_D"),
+            },
+            "values": {
+                # in rads/sec
+                "X": create_observable_value(0, "angular_velocity_X"),
+                "Y": create_observable_value(2, "angular_velocity_Y"),
+                "Z": create_observable_value(0, "angular_velocity_Z"),
+            }
+        }
+
+        self.angle_control = {
+            "tuning_paramiters": {
+                "P": create_observable_value(0, "angle_P"),
+                "I": create_observable_value(0, "angle_I"),
+                "D": create_observable_value(0, "angle_D"),
+            },
+            "values": {
+                # in rads
+                "X": create_observable_value(0, "angle_X"),
+                "Y": create_observable_value(0, "angle_Y"),
+                "Z": create_observable_value(0, "angle_Z"),
+            }
+        }
+
+
 class State:
     _instance = None
 
     stepper_values = StepperValues()
+    dc_motor_values = DCMotorValues()
 
     # The length of the IMU data history in milliseconds
     # So here 2000ms = 2s of data will be displayed on graphs

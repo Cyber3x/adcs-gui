@@ -3,8 +3,8 @@ import sys
 import PyQt6.QtGui as QtGui
 from PyQt6.QtWidgets import (QMainWindow, QApplication, QTabWidget)
 
-from tabs.ControlsTab import ControlsTab
-from tabs.RawDataGraphs import RawDataGraphs
+from tabs.AngularVelocityControlTab import AngularVelocityControlTab
+from tabs.RawDataGraphsTab import RawDataGraphsTab
 from tabs.RawDataTab import RawDataTab
 from tabs.SerialCommunicationTab import SerialCommunicationTab
 from tabs.StepperCalibrationTab import StepperCalibrationTab
@@ -26,16 +26,16 @@ class MainWindow(QMainWindow):
         self.raw_data_tab = RawDataTab(self)
         self.tabs.addTab(self.raw_data_tab, "Raw Data")
 
+        self.raw_data_graphs = RawDataGraphsTab(self)
+        self.tabs.addTab(self.raw_data_graphs, "Raw Data Graphs")
+
         self.stepper_calibration_tab = StepperCalibrationTab(self)
         self.tabs.addTab(self.stepper_calibration_tab, "Stepper Calibration")
 
-        self.raw_data_graphs = RawDataGraphs(self)
-        self.tabs.addTab(self.raw_data_graphs, "Raw Data Graphs")
+        self.angular_speed_control_tab = AngularVelocityControlTab(self)
+        self.tabs.addTab(self.angular_speed_control_tab, "Angular Speed Control")
 
-        self.controls_tab = ControlsTab(self)
-        self.tabs.addTab(self.controls_tab, "Controls")
-
-        self.tabs.setCurrentIndex(2)
+        self.tabs.setCurrentIndex(4)
         self.setCentralWidget(self.tabs)
 
         self.serial_communication_tab.refresh_com_ports()

@@ -89,6 +89,8 @@ class StepperCalibrationTab(QWidget):
         if not filename or not os.path.isfile(filename):
             return
 
+        # TODO: create a loader class so this is moved to there, here it should only be a few lines of code to save and laod data
+
         with open(filename, "r") as f:
             try:
                 data = json.load(f)

@@ -13,7 +13,7 @@ def create_plot_widget() -> pg.PlotWidget:
     return plot
 
 
-class RawDataGraphs(QWidget):
+class RawDataGraphsTab(QWidget):
     def __init__(self, parent):
         super().__init__(parent)
 

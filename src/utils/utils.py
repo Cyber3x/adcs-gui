@@ -36,3 +36,7 @@ def custom_JSON_encoder(obj):
         return obj.reprJSON()
     else:
         return obj
+
+
+def clamp(value, _min, _max):
+    return max(_min, min(value, _max))
