@@ -96,8 +96,9 @@ class StepperCalibrationTab(QWidget):
                 print("json error")
                 QMessageBox.critical(
                     self,
-                    title="Invalid JSON",
-                    text=f"{e.msg}",
+                    "Invalid JSON",
+                    f"The opened file is not a valid JSON file.\n\n"
+                    f"{e.msg}",
                     buttons=QMessageBox.StandardButton.Ok,
                     defaultButton=QMessageBox.StandardButton.Ok,
                 )
@@ -109,10 +110,10 @@ class StepperCalibrationTab(QWidget):
             print("validation error")
             QMessageBox.critical(
                 self,
-                title="Invalid JSON",
-                text=f"{validation_error.message}\n\n"
-                     "The format of the JSON file is invalid. Thus, the file cannot be opened.\nYou can try to fix the "
-                     "file manually or create a new one.",
+                "Invalid Data Format",
+                f"{validation_error.message}\n\n"
+                "The format of the JSON file is invalid. Thus, the file cannot be opened.\nYou can try to fix the "
+                "file manually or create a new one.",
                 buttons=QMessageBox.StandardButton.Ok,
                 defaultButton=QMessageBox.StandardButton.Ok,
             )
