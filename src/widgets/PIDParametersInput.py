@@ -2,8 +2,9 @@ from PyQt6.QtGui import QAction
 from PyQt6.QtWidgets import QWidget, QHBoxLayout, QLabel, QLineEdit
 
 from stores.GlobalStore import PIDParametersData
-from utils.saving_and_loading import save_json_data
+from utils.saving_and_loading import save_json_data, load_json_data
 from utils.utils import action_to_button
+from validators.schemas import PID_values_schema
 
 
 class PIDParametersInput(QWidget):
@@ -24,9 +25,9 @@ class PIDParametersInput(QWidget):
         self.kd_input = QLineEdit()
 
         # TODO: add validators
-        self.kp_input.textChanged.connect(lambda x: PIDData.P.set(x))
-        self.ki_input.textChanged.connect(lambda x: PIDData.I.set(x))
-        self.kd_input.textChanged.connect(lambda x: PIDData.D.set(x))
+        self.kp_input.textChanged.connect(lambda x: PIDData.P.set(float(x)))
+        self.ki_input.textChanged.connect(lambda x: PIDData.I.set(float(x)))
+        self.kd_input.textChanged.connect(lambda x: PIDData.D.set(float(x)))
 
         self.PIDData.P.add_callback(lambda x: self.kp_input.setText(str(x)))
         self.PIDData.I.add_callback(lambda x: self.ki_input.setText(str(x)))
@@ -45,7 +46,7 @@ class PIDParametersInput(QWidget):
         save_PID_values_action.triggered.connect(self.save_PID_values_file)
         save_PID_values_action.setShortcut("Ctrl+S")
 
-        load_PID_values_action = QAction("Load values")
+        load_PID_values_action = QAction("Open values")
         load_PID_values_action.triggered.connect(self.load_PID_values_file)
         load_PID_values_action.setShortcut("Ctrl+O")
 
@@ -61,4 +62,5 @@ class PIDParametersInput(QWidget):
         save_json_data(self.PIDData, "Save PID values", "PID_values_angular_velocity.json")
 
     def load_PID_values_file(self):
-        print("Loading PID values")
+        loaded_data = load_json_data(PID_values_schema, "Load PID values")
+        self.PIDData.update(loaded_data)

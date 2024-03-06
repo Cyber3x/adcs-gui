@@ -59,6 +59,11 @@ class AxisData(Serializable):
         self.Y = create_observable_value(0, f"{name}_Y")
         self.Z = create_observable_value(0, f"{name}_Z")
 
+    def update(self, new_data: str):
+        self.X.set(new_data[self.name]["X"])
+        self.Y.set(new_data[self.name]["Y"])
+        self.Z.set(new_data[self.name]["Z"])
+
     def reprJSON(self):
         return {
             self.name: {
@@ -109,6 +114,11 @@ class PIDParametersData(Serializable):
                 "D": self.D,
             }
         }
+
+    def update(self, new_data: str):
+        self.P.set(new_data[self.name]["P"])
+        self.I.set(new_data[self.name]["I"])
+        self.D.set(new_data[self.name]["D"])
 
     def __str__(self):
         return f"PIDParametersData({self.name}) - P: {self.P.get()} I: {self.I.get()} D: {self.D.get()}"

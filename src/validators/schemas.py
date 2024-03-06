@@ -31,7 +31,7 @@ PID_values_schema = {
     "$id": "adcs-gui/PID-values.schema.json",
     "type": "object",
     "properties": {
-        "PID_values": {
+        "PID_values_angular_velocity_control": {
             "type": "object",
             "properties": {
                 "P": {"type": "number"},
@@ -42,6 +42,6 @@ PID_values_schema = {
             "additionalProperties": False
         }
     },
-    "required": ["PID_values"],
+    "required": ["PID_values_angular_velocity_control"],
     "additionalProperties": False
 }
