@@ -5,7 +5,7 @@ from PyQt6.QtWidgets import (QWidget, QVBoxLayout, QHBoxLayout,
                              QLabel, QPushButton, QSlider,
                              QLineEdit)
 
-from stores.GlobalStore import State
+from stores.GlobalStore import State, MIN_ANGULAR_VELOCITY, MAX_ANGULAR_VELOCITY
 from utils.utils import clamp
 
 # FIXME: This is a temporary solution to the slider not being able to handle floats
@@ -13,7 +13,7 @@ from utils.utils import clamp
 SLIDER_SCALAR_VALUE = 100
 
 
-class AxisControls(QWidget):
+class AxisAngularVelocityControl(QWidget):
     def __init__(self, axis_name: str, parent=None):
         super().__init__(parent)
         self.axis_name = axis_name
@@ -64,10 +64,9 @@ class AxisControls(QWidget):
         # ---- FLYWHEEL CONTROLS LAYOUT END ----
 
         self.angular_velocity_slider = QSlider()
-        #  FIXME: when the input is set to 3 aka 300 whats more than the slider max it get's set to
-        #   the max of 200 when the slider is again set to 300 it gets set and isn't reset
         self.angular_velocity_slider.setOrientation(Qt.Orientation.Horizontal)
-        self.angular_velocity_slider.setRange(-200, 200)
+        self.angular_velocity_slider.setRange(MIN_ANGULAR_VELOCITY * SLIDER_SCALAR_VALUE,
+                                              MAX_ANGULAR_VELOCITY * SLIDER_SCALAR_VALUE)
         self.angular_velocity_slider.setSingleStep(1)
         self.angular_velocity_slider.setTickPosition(QSlider.TickPosition.TicksAbove)
         self.angular_velocity_slider.valueChanged.connect(self.handle_rotation_rate_slider_change)
@@ -83,9 +82,9 @@ class AxisControls(QWidget):
         # AXIS ANGLE PLOT
         self.angular_velocity_plot = pg.PlotWidget()
         self.angular_velocity_plot.showGrid(True, True)
-        self.angular_velocity_plot.setLabel('left', 'Angular velocity', 'rad/s')
+        self.angular_velocity_plot.setLabel('left', 'Angular velocity', 'deg/s')
         self.angular_velocity_plot.setBackground('transparent')
-        self.angular_velocity_plot.setYRange(-2, 2)
+        self.angular_velocity_plot.setYRange(MIN_ANGULAR_VELOCITY, MAX_ANGULAR_VELOCITY)
         self.angular_velocity_plot.enableAutoRange()
 
         layout_main_vertical.addWidget(self.angular_velocity_plot)
@@ -110,8 +109,8 @@ class AxisControls(QWidget):
     def handle_set_rotation_rate_button_clicked(self):
         new_angular_velocity = clamp(
             float(self.dc_motor_velocity_input.text()),
-            self.state.dc_motor_values.MIN_ANGULAR_VELOCITY,
-            self.state.dc_motor_values.MAX_ANGULAR_VELOCITY
+            MIN_ANGULAR_VELOCITY,
+            MAX_ANGULAR_VELOCITY
         )
 
         self.dc_motor_velocity_input.setText(str(new_angular_velocity))

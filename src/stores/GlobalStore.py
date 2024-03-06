@@ -17,6 +17,9 @@ axes: Axes = ["X", "Y", "Z"]
 # there's a default value but it can be changed wiht a command
 data_interval_delay_ms = 50
 
+MAX_ANGULAR_VELOCITY = 2  # rads/sec
+MIN_ANGULAR_VELOCITY = -2  # rads/sec
+
 
 class IMUData:
     def __init__(self):
@@ -125,9 +128,6 @@ class PIDParametersData(Serializable):
 
 
 class DCMotorValues:
-    MAX_ANGULAR_VELOCITY = 2  # rads/sec
-    MIN_ANGULAR_VELOCITY = -2  # rads/sec
-
     def __init__(self):
         self.angular_velocity_control = {
             "PIDParams": PIDParametersData("PID_values_angular_velocity_control"),
