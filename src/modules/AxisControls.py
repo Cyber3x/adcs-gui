@@ -122,7 +122,7 @@ class AxisControls(QWidget):
         )
 
     def handle_stop_button_clicked(self):
-        self.state.dc_motor_values.angular_velocity_control["values"][self.axis_name].set(0)
+        getattr(self.state.dc_motor_values.angular_velocity_control["values"], self.axis_name).set(0)
         self.handle_set_rotation_rate_button_clicked()
 
     def set_intital_values(self):

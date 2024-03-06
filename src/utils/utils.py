@@ -47,3 +47,13 @@ class Serializable(ABC):
 
 def clamp(value, _min, _max):
     return max(_min, min(value, _max))
+
+
+def int_or_float_to_str(value):
+    """
+    This function converts a float to a string and removes the decimal point and zero if the value is a whole number
+    @param value: The number to convert to a string
+    @return: String representation of the number
+    """
+    s = str(value)
+    return s.replace('.0', '') if value == int(value) else s
