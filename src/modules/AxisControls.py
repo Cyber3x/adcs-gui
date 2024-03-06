@@ -21,7 +21,7 @@ class AxisControls(QWidget):
         self.state = State()
 
         layout_main_vertical = QVBoxLayout()
-        layout_main_vertical.setContentsMargins(10, 0, 10, 0)
+        layout_main_vertical.setContentsMargins(0, 0, 0, 0)
         layout_main_vertical.setAlignment(Qt.AlignmentFlag.AlignTop)
 
         axis_name_label = QLabel(f"{axis_name}")
@@ -48,7 +48,7 @@ class AxisControls(QWidget):
         layout_dc_motor_control = QHBoxLayout()
 
         self.dc_motor_velocity_input = QLineEdit()
-        self.state.dc_motor_values.angular_velocity_control["values"][axis_name].add_callback(
+        getattr(self.state.dc_motor_values.angular_velocity_control["values"], axis_name).add_callback(
             lambda x: self.dc_motor_velocity_input.setText(str(x))
         )
 
@@ -71,7 +71,7 @@ class AxisControls(QWidget):
         self.angular_velocity_slider.setSingleStep(1)
         self.angular_velocity_slider.setTickPosition(QSlider.TickPosition.TicksAbove)
         self.angular_velocity_slider.valueChanged.connect(self.handle_rotation_rate_slider_change)
-        self.state.dc_motor_values.angular_velocity_control["values"][axis_name].add_callback(
+        getattr(self.state.dc_motor_values.angular_velocity_control["values"], axis_name).add_callback(
             lambda x: self.angular_velocity_slider.setValue(int(x * SLIDER_SCALAR_VALUE))
         )
         layout_main_vertical.addWidget(self.angular_velocity_slider)
@@ -103,7 +103,7 @@ class AxisControls(QWidget):
         self.angular_velocity_plot.plot(angle_datapoints, pen=pen)
 
     def handle_rotation_rate_slider_change(self):
-        self.state.dc_motor_values.angular_velocity_control["values"][self.axis_name].set(
+        getattr(self.state.dc_motor_values.angular_velocity_control["values"], self.axis_name).set(
             self.angular_velocity_slider.value() / SLIDER_SCALAR_VALUE
         )
 
@@ -117,7 +117,7 @@ class AxisControls(QWidget):
         self.dc_motor_velocity_input.setText(str(new_angular_velocity))
 
         print(f"set dc motor of axis {self.axis_name} to {new_angular_velocity} rad/s")
-        self.state.dc_motor_values.angular_velocity_control["values"][self.axis_name].set(
+        getattr(self.state.dc_motor_values.angular_velocity_control["values"], self.axis_name).set(
             new_angular_velocity
         )
 
@@ -127,9 +127,11 @@ class AxisControls(QWidget):
 
     def set_intital_values(self):
         self.dc_motor_velocity_input.setText(
-            str(self.state.dc_motor_values.angular_velocity_control["values"][self.axis_name].get())
+            str(getattr(self.state.dc_motor_values.angular_velocity_control["values"], self.axis_name).get())
         )
         self.angular_velocity_slider.setValue(
-            int(self.state.dc_motor_values.angular_velocity_control["values"][
-                    self.axis_name].get() * SLIDER_SCALAR_VALUE)
+            int(
+                getattr(self.state.dc_motor_values.angular_velocity_control["values"], self.axis_name)
+                .get() * SLIDER_SCALAR_VALUE
+            )
         )

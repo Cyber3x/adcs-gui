@@ -1,16 +1,13 @@
-import json
-import os.path
-from json.decoder import JSONDecodeError
-
 from PyQt6.QtCore import Qt
 from PyQt6.QtGui import QAction
-from PyQt6.QtWidgets import (QWidget, QVBoxLayout, QHBoxLayout, QMessageBox,
-                             QLabel, QSlider, QPushButton, QLineEdit, QFileDialog)
+from PyQt6.QtWidgets import (QWidget, QVBoxLayout, QHBoxLayout, QLabel, QSlider, QPushButton, QLineEdit)
 
 from core.communication import send_command
 from stores.GlobalStore import State
-from utils.utils import create_debounce_timer, action_to_button, custom_JSON_encoder
+from utils.saving_and_loading import save_json_data, load_json_data
+from utils.utils import create_debounce_timer, action_to_button
 from validators.DoubleValidator import DoubleValidator
+from validators.schemas import stepper_values_schema
 
 axes = ["X", "Y", "Z"]
 stepper_value_slider_scalar = 10
@@ -56,69 +53,15 @@ class StepperCalibrationTab(QWidget):
 
         return toolbar
 
-    def save_stepper_values_file(self):
-        filters = "JavaScript Object Notation (*.json)"
-        filename, selected_filter = QFileDialog.getSaveFileName(
-            self,
-            caption="Save stepper values",
-            directory="stepper_values.json",
-            filter=filters,
-            initialFilter=filters,
-        )
+    @staticmethod
+    def save_stepper_values_file():
+        save_json_data(State().stepper_values, "Save stepper values", "stepper_values.json")
 
-        if not filename:
-            return
+    @staticmethod
+    def open_stepper_values_file():
+        data = load_json_data(stepper_values_schema, "Open stepper values")
 
-        with open(filename, "w") as f:
-            json.dump(State().stepper_values, f, default=custom_JSON_encoder, indent=4)
-
-    def open_stepper_values_file(self):
-        caption = "Open stepper values"  # Empty uses default caption
-        inital_dir = ""  # Empty uses current folder
-        filters = "JavaScript Object Notation (*.json)"
-        initial_filter = "All files (*.*)"
-
-        filename, selected_filter = QFileDialog.getOpenFileName(
-            self,
-            caption=caption,
-            directory=inital_dir,
-            filter=filters,
-            initialFilter=initial_filter,
-        )
-
-        if not filename or not os.path.isfile(filename):
-            return
-
-        # TODO: create a loader class so this is moved to there, here it should only be a few lines of code to save and laod data
-
-        with open(filename, "r") as f:
-            try:
-                data = json.load(f)
-            except JSONDecodeError as e:
-                print("json error")
-                QMessageBox.critical(
-                    self,
-                    "Invalid JSON",
-                    f"The opened file is not a valid JSON file.\n\n"
-                    f"{e.msg}",
-                    buttons=QMessageBox.StandardButton.Ok,
-                    defaultButton=QMessageBox.StandardButton.Ok,
-                )
-                return
-
-        validation_error = State().stepper_values.update(data)
-
-        if validation_error:
-            print("validation error")
-            QMessageBox.critical(
-                self,
-                "Invalid Data Format",
-                f"{validation_error.message}\n\n"
-                "The format of the JSON file is invalid. Thus, the file cannot be opened.\nYou can try to fix the "
-                "file manually or create a new one.",
-                buttons=QMessageBox.StandardButton.Ok,
-                defaultButton=QMessageBox.StandardButton.Ok,
-            )
+        State().stepper_values.update(data)
 
 
 class _StepperControls(QWidget):

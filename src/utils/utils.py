@@ -1,3 +1,4 @@
+from abc import ABC, abstractmethod
 from typing import Callable, TypeVar
 
 import numpy as np
@@ -36,6 +37,12 @@ def custom_JSON_encoder(obj):
         return obj.reprJSON()
     else:
         return obj
+
+
+class Serializable(ABC):
+    @abstractmethod
+    def reprJSON(self):
+        pass
 
 
 def clamp(value, _min, _max):

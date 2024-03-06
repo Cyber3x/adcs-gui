@@ -1,11 +1,10 @@
-from typing import Dict, List, Callable, Literal, Optional
+from typing import Dict, List, Callable, Literal
 
 import numpy as np
-from jsonschema import validate, ValidationError
 
 from core.ObservableValue import create_observable_value
+from utils.utils import Serializable
 from utils.utils import append_to_array
-from validators.schemas import stepper_values_schema
 
 # custom types
 Axis = Literal["X", "Y", "Z"]
@@ -47,7 +46,30 @@ class IMUDataTemperature:
         return self._callbacks
 
 
-class StepperValues:
+class AxisData(Serializable):
+    """
+    A generic class to store data related to each axis
+
+    :param name: the name of the data, used to create the observable values and when saving the data to json
+    """
+
+    def __init__(self, name: str):
+        self.name = name
+        self.X = create_observable_value(0, f"{name}_X")
+        self.Y = create_observable_value(0, f"{name}_Y")
+        self.Z = create_observable_value(0, f"{name}_Z")
+
+    def reprJSON(self):
+        return {
+            self.name: {
+                "X": self.X,
+                "Y": self.Y,
+                "Z": self.Z,
+            }
+        }
+
+
+class StepperValues(Serializable):
     def __init__(self):
         self.X = create_observable_value(0, "stepper_value_X")
         self.Y = create_observable_value(0, "stepper_value_Y")
@@ -62,27 +84,34 @@ class StepperValues:
             }
         }
 
-    # TODO: should we validate the data before every update?
-    # could this be a performance hit? for now probably not but something to thing about
-    # TODO: if the motors can't move in parallel we need too add delay in order to move them sequentially
-
-    def update(self, new_data: str) -> Optional[ValidationError]:
-        """
-        Update the stepper values from a json string
-
-        :param new_data: a json string with the stepper values
-
-        :return: None if the data is valid, ValidationError if the data is invalid
-        """
-
-        try:
-            validate(new_data, stepper_values_schema)
-        except ValidationError as e:
-            return e
-
+    def update(self, new_data: str):
         self.X.set(new_data["stepper_values"]["X"])
         self.Y.set(new_data["stepper_values"]["Y"])
         self.Z.set(new_data["stepper_values"]["Z"])
+
+
+class PIDParametersData(Serializable):
+    """
+    This calss is used to store the PID values. Used as a data class
+    """
+
+    def __init__(self, name: str):
+        self.name = name
+        self.P = create_observable_value(0, f"{name}_P")
+        self.I = create_observable_value(0, f"{name}_I")
+        self.D = create_observable_value(0, f"{name}_D")
+
+    def reprJSON(self):
+        return {
+            self.name: {
+                "P": self.P,
+                "I": self.I,
+                "D": self.D,
+            }
+        }
+
+    def __str__(self):
+        return f"PIDParametersData({self.name}) - P: {self.P.get()} I: {self.I.get()} D: {self.D.get()}"
 
 
 class DCMotorValues:
@@ -91,31 +120,13 @@ class DCMotorValues:
 
     def __init__(self):
         self.angular_velocity_control = {
-            "tuning_paramiters": {
-                "P": create_observable_value(0, "angular_velocity_P"),
-                "I": create_observable_value(0, "angular_velocity_I"),
-                "D": create_observable_value(0, "angular_velocity_D"),
-            },
-            "values": {
-                # in rads/sec
-                "X": create_observable_value(0, "angular_velocity_X"),
-                "Y": create_observable_value(2, "angular_velocity_Y"),
-                "Z": create_observable_value(0, "angular_velocity_Z"),
-            }
+            "tuning_paramiters": PIDParametersData("angular_velocity"),
+            "values": AxisData("angular_velocity")  # rads/sec
         }
 
         self.angle_control = {
-            "tuning_paramiters": {
-                "P": create_observable_value(0, "angle_P"),
-                "I": create_observable_value(0, "angle_I"),
-                "D": create_observable_value(0, "angle_D"),
-            },
-            "values": {
-                # in rads
-                "X": create_observable_value(0, "angle_X"),
-                "Y": create_observable_value(0, "angle_Y"),
-                "Z": create_observable_value(0, "angle_Z"),
-            }
+            "tuning_paramiters": PIDParametersData("angle"),
+            "values": AxisData("angle")  # rads
         }
 
 
