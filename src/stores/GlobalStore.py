@@ -120,12 +120,12 @@ class DCMotorValues:
 
     def __init__(self):
         self.angular_velocity_control = {
-            "tuning_paramiters": PIDParametersData("angular_velocity"),
+            "PIDParams": PIDParametersData("PID_values_angular_velocity_control"),
             "values": AxisData("angular_velocity")  # rads/sec
         }
 
         self.angle_control = {
-            "tuning_paramiters": PIDParametersData("angle"),
+            "PIDParams": PIDParametersData("PID_values_angle_control"),
             "values": AxisData("angle")  # rads
         }
 

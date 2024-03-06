@@ -25,3 +25,23 @@ stepper_values_schema = {
     "required": ["stepper_values"],
     "additionalProperties": False
 }
+
+PID_values_schema = {
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "adcs-gui/PID-values.schema.json",
+    "type": "object",
+    "properties": {
+        "PID_values": {
+            "type": "object",
+            "properties": {
+                "P": {"type": "number"},
+                "I": {"type": "number"},
+                "D": {"type": "number"}
+            },
+            "required": ["P", "I", "D"],
+            "additionalProperties": False
+        }
+    },
+    "required": ["PID_values"],
+    "additionalProperties": False
+}

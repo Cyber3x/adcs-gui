@@ -8,12 +8,15 @@ from jsonschema import validate, ValidationError
 
 from utils.utils import custom_JSON_encoder
 
+CONFIG_DIR = "config"
+
 
 def save_json_data(data, caption: str, directory: str):
     filters = "JavaScript Object Notation (*.json)"
     filename, selected_filter = QFileDialog.getSaveFileName(
+        None,
         caption,
-        directory,
+        os.path.join(CONFIG_DIR, directory),
         filter=filters,
         initialFilter=filters,
     )
@@ -39,9 +42,11 @@ def load_json_data(schema, caption: str, inital_dir: str = "") -> Optional[T]:
     filters = "JavaScript Object Notation (*.json)"
     initial_filter = "All files (*.*)"
 
+    init_directory = os.path.join(os.getcwd(), CONFIG_DIR, inital_dir)
+
     filename, selected_filter = QFileDialog.getOpenFileName(
         caption=caption,
-        directory=inital_dir,
+        directory=init_directory,
         filter=filters,
         initialFilter=initial_filter,
     )
