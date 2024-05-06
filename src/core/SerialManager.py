@@ -19,7 +19,7 @@ class SerialManager(metaclass=SingeltonMeta):
     def open_port(self, port_name: str, baud_date: int, data_bits: int, stop_bits: float):
         log.debug("Opening port: " + port_name)
         if self.serial_port.isOpen():
-            log.warning("Serial port was already opened, closing the connection")
+            log.warning(f"Serial port was already open ({port_name}), closing the connection")
             self.serial_port.close()
 
         self.serial_port.setPortName(port_name)
@@ -83,5 +83,6 @@ class SerialManager(metaclass=SingeltonMeta):
             return False
 
         self.serial_port.readyRead.disconnect(self.reader)
+        log.debug("Closed port: " + self.serial_port.portName())
         self.serial_port.close()
         return True

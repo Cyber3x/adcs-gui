@@ -1,0 +1,5 @@
+from .SerialCommunicationTab import SerialCommunicationTab
+from .RawDataGraphsTab import RawDataGraphsTab
+from .AngularVelocityControlTab import AngularVelocityControlTab
+from .RawDataTab import RawDataTab
+from .StepperCalibrationTab import StepperCalibrationTab

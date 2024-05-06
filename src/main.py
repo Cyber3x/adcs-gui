@@ -4,11 +4,8 @@ import sys
 import PyQt6.QtGui as QtGui
 from PyQt6.QtWidgets import (QMainWindow, QApplication, QTabWidget)
 
-from tabs.RawDataGraphsTab import RawDataGraphsTab
-from tabs.SerialCommunicationTab import SerialCommunicationTab
-from tabs.AngularVelocityControlTab import AngularVelocityControlTab
-from tabs.RawDataTab import RawDataTab
-from tabs.StepperCalibrationTab import StepperCalibrationTab
+from tabs import RawDataGraphsTab, RawDataTab, StepperCalibrationTab, AngularVelocityControlTab, SerialCommunicationTab
+
 
 class MainWindow(QMainWindow):
     def __init__(self):
