@@ -1,13 +1,16 @@
+import logging
 import time
 
 from PyQt6.QtGui import QTextCursor
-from PyQt6.QtSerialPort import QSerialPort, QSerialPortInfo
+from PyQt6.QtSerialPort import QSerialPortInfo
 from PyQt6.QtWidgets import (QWidget, QVBoxLayout, QHBoxLayout,
-                             QComboBox, QLabel, QPushButton,
-                             QPlainTextEdit)
+    QComboBox, QLabel, QPushButton,
+    QPlainTextEdit)
 
+from core.SerialManager import SerialManager
 from stores.GlobalStore import State
-from utils.parsing import parse_input_line
+
+log = logging.getLogger()
 
 
 class SerialCommunicationTab(QWidget):
@@ -15,6 +18,7 @@ class SerialCommunicationTab(QWidget):
         super().__init__()
         self.parent = parent
         self.state = State()
+        self.serial_manager = SerialManager()
 
         # Create a layout for the serial communication tab
         self.serial_layout = QVBoxLayout(self)
@@ -89,18 +93,17 @@ class SerialCommunicationTab(QWidget):
 
         self.setLayout(self.serial_layout)
 
-        self.serial_port: QSerialPort = QSerialPort()
-
-        self.data = bytearray()
+        log.info("SERAL TAB")
 
     def refresh_com_ports(self):
-        print("Refreshing COM Ports")
+        log.debug("Refresing com ports")
 
         self.com_port_dropdown.clear()
 
         # get list of available ports
-        available_ports: list[QSerialPortInfo] = QSerialPortInfo.availablePorts()
+        available_ports: list[QSerialPortInfo] = self.serial_manager.get_available_ports()
 
+        # try to find rfcomm0, if successful open it, else wait for the user
         found = False
         for port in available_ports:
             self.com_port_dropdown.addItem(port.portName())
@@ -109,6 +112,7 @@ class SerialCommunicationTab(QWidget):
                 self.com_port_dropdown.setCurrentText("rfcomm0")
                 found = True
 
+        return
         if found:
             time.sleep(0.5)
             self.open_port()
@@ -117,15 +121,8 @@ class SerialCommunicationTab(QWidget):
         port_name = self.com_port_dropdown.currentText()
 
         if not port_name:
-            print("No port selected")
+            log.debug("No port selected")
             self.text_area.appendPlainText("No port selected")
-            return
-
-        print("Opening Port")
-        if self.serial_port.isOpen():
-            print(f"Port is already open, baud: {self.serial_port.baudRate()}")
-            self.serial_port.close()
-            print("Port closed")
             return
 
         # Set up serial port
@@ -133,53 +130,16 @@ class SerialCommunicationTab(QWidget):
         data_bits = int(self.data_bits_dropdown.currentText())
         stop_bits = float(self.stop_bits_dropdown.currentText())
 
-        self.serial_port.setPortName(port_name)
-        self.serial_port.setBaudRate(baud_rate)
-        self.serial_port.setDataBits(QSerialPort.DataBits(data_bits))
-        self.serial_port.setStopBits(QSerialPort.StopBits(stop_bits))
-        self.serial_port.setParity(QSerialPort.Parity.NoParity)
-        self.serial_port.setFlowControl(QSerialPort.FlowControl.NoFlowControl)
+        opened = self.serial_manager.open_port(port_name, baud_rate, data_bits, stop_bits)
 
-        if self.serial_port.open(QSerialPort.OpenModeFlag.ReadWrite):
-            print("Port opened")
+        if opened:
             self.text_area.clear()
             self.text_area.appendPlainText("Port opened")
-            self.serial_port.readyRead.connect(self.read_data)
-
-            # clear data
-            self.data = bytearray()
+            self.serial_manager.start_reading()
+            log.debug("Port opened: " + port_name)
         else:
             self.text_area.appendPlainText("Port failed to open")
-            print("Port failed to open")
-
-    def read_data(self):
-        # accumulate new data to the old one
-        self.data += self.serial_port.readAll().data()
-        lines = self.data.split(b"\n")
-
-        # Process all complete lines
-        # Ignore the last line as it might be incomplete
-        for line_bytes in lines[:-1]:
-            line = parse_input_line(line_bytes, self.state)
-
-            if not line:
-                continue
-
-            self.update_text_area(line)
-
-        # Keep the incomplete line for the next iteration
-        self.data = lines[-1]
-
-    def write_data(self, data: str):
-        if self.serial_port.isOpen():
-            self.serial_port.writeData(data.encode() + b'\r')
-            isDataWritten = self.serial_port.flush()
-            if isDataWritten:
-                print("Data written")
-            else:
-                print("Data not written")
-        else:
-            print("No port is open")
+            log.debug("Failed to open serial port: " + port_name)
 
     def update_text_area(self, text):
         self.text_area.appendPlainText(text)
@@ -189,8 +149,9 @@ class SerialCommunicationTab(QWidget):
         self.parent.raw_data_tab.text_area.moveCursor(QTextCursor.MoveOperation.End)
 
     def close_port(self):
-        if self.serial_port.isOpen():
-            self.serial_port.close()
+        closed = self.serial_manager.close_port()
+
+        if closed:
             self.text_area.appendPlainText("Port closed")
             self.text_area.moveCursor(QTextCursor.MoveOperation.End)
         else:

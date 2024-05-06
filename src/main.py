@@ -1,14 +1,14 @@
+import logging.config
 import sys
 
 import PyQt6.QtGui as QtGui
 from PyQt6.QtWidgets import (QMainWindow, QApplication, QTabWidget)
 
-from tabs.AngularVelocityControlTab import AngularVelocityControlTab
 from tabs.RawDataGraphsTab import RawDataGraphsTab
-from tabs.RawDataTab import RawDataTab
 from tabs.SerialCommunicationTab import SerialCommunicationTab
+from tabs.AngularVelocityControlTab import AngularVelocityControlTab
+from tabs.RawDataTab import RawDataTab
 from tabs.StepperCalibrationTab import StepperCalibrationTab
-
 
 class MainWindow(QMainWindow):
     def __init__(self):
@@ -58,6 +58,10 @@ class MainWindow(QMainWindow):
 
 
 if __name__ == '__main__':
+    logging.config.fileConfig("config/logging.conf")
+    log = logging.getLogger()
+    log.info("App started")
+
     app = QApplication(sys.argv)
     app.setStyle('fusion')
     window = MainWindow()
