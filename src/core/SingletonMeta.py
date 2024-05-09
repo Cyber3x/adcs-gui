@@ -1,8 +1,32 @@
+from abc import ABC
 from threading import Lock
+from typing import Generic, TypeVar, Callable, Any
+
+T = TypeVar('T')
+
+
+class Singelton(Generic[T]):
+    def __call__(self) -> None:
+        raise TypeError("Singeltons must be acceses through get_instance()")
+
+    def __init__(self, decorated: Callable[..., T]):
+        self._instance = None
+        self._decorated = decorated
+        self._lock = Lock()
+
+    def get_instance(self, *args: Any, **kwargs: Any) -> T:
+        if self._instance is None:
+            with self._lock:
+                if self._instance is None:
+                    self._instance = self._decorated(*args, **kwargs)
+        return self._instance
+
+    def __instancecheck__(self, instance: Any) -> bool:
+        return isinstance(instance, self._decorated)
 
 
 # source: https://refactoring.guru/design-patterns/singleton/python/example#example-1
-class SingeltonMeta(type):
+class SingletonMeta(ABC):
     """
         This is a thread-safe implementation of Singleton.
         """

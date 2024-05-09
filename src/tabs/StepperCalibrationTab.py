@@ -71,7 +71,7 @@ class _StepperControls(QWidget):
         self.axis_name = axis_name
         self.parent = parent
 
-        self.stepper_value = getattr(State().stepper_values, axis_name)
+        self.stepper_value = getattr(State.get_instance().stepper_values, axis_name)
 
         self.layout_main = QVBoxLayout(self)
         self.layout_main.setAlignment(Qt.AlignmentFlag.AlignTop)

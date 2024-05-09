@@ -1,24 +1,26 @@
 import logging
-import time
 
 from PyQt6.QtGui import QTextCursor
 from PyQt6.QtSerialPort import QSerialPortInfo
 from PyQt6.QtWidgets import (QWidget, QVBoxLayout, QHBoxLayout,
     QComboBox, QLabel, QPushButton,
     QPlainTextEdit)
+from zope.interface import implementer
 
-from core.SerialManager import SerialManager
+from core import SerialManager, ISerialDataListener
 from stores.GlobalStore import State
 
 log = logging.getLogger()
 
 
+@implementer(ISerialDataListener)
 class SerialCommunicationTab(QWidget):
     def __init__(self, parent=None):
         super().__init__()
         self.parent = parent
-        self.state = State()
-        self.serial_manager = SerialManager()
+        self.state = State.get_instance()
+        self.serial_manager = SerialManager.get_instance()
+        self.serial_manager.add_listener(self)
 
         # Create a layout for the serial communication tab
         self.serial_layout = QVBoxLayout(self)
@@ -93,8 +95,6 @@ class SerialCommunicationTab(QWidget):
 
         self.setLayout(self.serial_layout)
 
-        log.info("SERAL TAB")
-
     def refresh_com_ports(self):
         log.debug("Refresing com ports")
 
@@ -111,11 +111,6 @@ class SerialCommunicationTab(QWidget):
             if port.portName() == "rfcomm0":
                 self.com_port_dropdown.setCurrentText("rfcomm0")
                 found = True
-
-        return
-        if found:
-            time.sleep(0.5)
-            self.open_port()
 
     def open_port(self):
         port_name = self.com_port_dropdown.currentText()
@@ -156,3 +151,6 @@ class SerialCommunicationTab(QWidget):
             self.text_area.moveCursor(QTextCursor.MoveOperation.End)
         else:
             self.text_area.appendPlainText("No port is open")
+
+    def on_new_line(self, line: str):
+        self.update_text_area(line)

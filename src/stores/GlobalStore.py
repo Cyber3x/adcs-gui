@@ -1,8 +1,12 @@
+import logging
+import math
+import time
 from typing import Dict, List, Callable, Literal
 
 import numpy as np
 
 from core.ObservableValue import create_observable_value
+from core.SingletonMeta import Singelton
 from utils.utils import Serializable
 from utils.utils import append_to_array
 
@@ -19,6 +23,8 @@ data_interval_delay_ms = 50
 
 MAX_ANGULAR_VELOCITY = 2  # rads/sec
 MIN_ANGULAR_VELOCITY = -2  # rads/sec
+
+log = logging.getLogger()
 
 
 class IMUData:
@@ -140,6 +146,7 @@ class DCMotorValues:
         }
 
 
+@Singelton
 class State:
     _instance = None
 
@@ -160,6 +167,14 @@ class State:
     IMU_magnetometer_data = IMUData()
 
     IMU_temperature_data = IMUDataTemperature()
+
+    # Debug information
+    average_data_delay = create_observable_value(0)
+    min_data_delay = create_observable_value(math.inf)
+    max_data_delay = create_observable_value(-math.inf)
+    total_packets_read = create_observable_value(0)
+    skipped_packets = create_observable_value(0)
+    _sum_data_delay = 0
 
     def _add_IMU_datapoint(self, IMU_data: IMUData, x: float, y: float, z: float):
         for axis in axes:
@@ -185,13 +200,35 @@ class State:
         self._add_IMU_datapoint(self.IMU_magnetometer_data, x, y, z)
 
     def add_IMU_temperature_datapoint(self, temp: float):
-        self.IMU_temperature_data.data = append_to_array(self.IMU_temperature_data.data, temp,
-                                                         self.IMU_max_number_of_datapoints)
+        self.IMU_temperature_data.data = append_to_array(
+            self.IMU_temperature_data.data, temp,
+            self.IMU_max_number_of_datapoints
+        )
 
         for callback in self.IMU_temperature_data.get_callbacks():
             callback(self.IMU_temperature_data.data)
 
-    def __new__(cls, *args, **kwargs):
-        if not cls._instance:
-            cls._instance = super(State, cls).__new__(cls, *args, **kwargs)
-        return cls._instance
+    last_packet_number = None
+    last_packet_time = None
+
+    def add_packet_number(self, packet_number: int):
+        self.total_packets_read.set(self.total_packets_read.get() + 1)
+
+        if self.last_packet_number is not None and self.last_packet_number + 1 != packet_number:
+            self.skipped_packets.set(self.skipped_packets.get() + 1)
+
+        if self.last_packet_time is not None:
+            delay_ns = time.time_ns() - self.last_packet_time
+            delay_ms = delay_ns / 1_000_000
+            self._sum_data_delay += delay_ms
+            self.average_data_delay.set(self._sum_data_delay / self.total_packets_read.get())
+            if self.total_packets_read.get() > 20:
+                self.min_data_delay.set(min(delay_ms, self.min_data_delay.get()))
+                self.max_data_delay.set(max(delay_ms, self.max_data_delay.get()))
+
+        self.last_packet_time = time.time_ns()
+
+        self.last_packet_number = packet_number
+
+    def __init__(self):
+        log.info("GLoablStore - constructor called")

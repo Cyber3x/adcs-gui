@@ -4,7 +4,9 @@ import sys
 import PyQt6.QtGui as QtGui
 from PyQt6.QtWidgets import (QMainWindow, QApplication, QTabWidget)
 
-from tabs import RawDataGraphsTab, RawDataTab, StepperCalibrationTab, AngularVelocityControlTab, SerialCommunicationTab
+from core import SerialManager, SerialDataParser
+from tabs import RawDataGraphsTab, RawDataTab, StepperCalibrationTab, AngularVelocityControlTab, SerialCommunicationTab, \
+    DebugInfoTab
 
 
 class MainWindow(QMainWindow):
@@ -32,10 +34,18 @@ class MainWindow(QMainWindow):
         self.angular_speed_control_tab = AngularVelocityControlTab(self)
         self.tabs.addTab(self.angular_speed_control_tab, "Angular Speed Control")
 
+        self.debug_info_tab = DebugInfoTab(self)
+        self.tabs.addTab(self.debug_info_tab, "Debug Info")
+
         self.tabs.setCurrentIndex(4)
         self.setCentralWidget(self.tabs)
 
         self.serial_communication_tab.refresh_com_ports()
+
+        ## debug
+        self.serial_manager = SerialManager.get_instance()
+        self.serial_manager.add_listener(SerialDataParser())
+        # self.serial_manager.add_listener(SerialSpeedTester())
 
     def handle_text_changed(self):
         print(self.serial_communication_tab.text_area.toPlainText())

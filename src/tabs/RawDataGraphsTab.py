@@ -17,7 +17,7 @@ class RawDataGraphsTab(QWidget):
     def __init__(self, parent):
         super().__init__(parent)
 
-        self.state = State()
+        self.state = State.get_instance()
 
         self.layout_main = QVBoxLayout(self)
 

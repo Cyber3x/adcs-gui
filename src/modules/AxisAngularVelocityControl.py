@@ -2,8 +2,8 @@ import numpy as np
 import pyqtgraph as pg
 from PyQt6.QtCore import Qt
 from PyQt6.QtWidgets import (QWidget, QVBoxLayout, QHBoxLayout,
-                             QLabel, QPushButton, QSlider,
-                             QLineEdit)
+    QLabel, QPushButton, QSlider,
+    QLineEdit)
 
 from stores.GlobalStore import State, MIN_ANGULAR_VELOCITY, MAX_ANGULAR_VELOCITY
 from utils.utils import clamp
@@ -18,7 +18,7 @@ class AxisAngularVelocityControl(QWidget):
         super().__init__(parent)
         self.axis_name = axis_name
         self.parent = parent
-        self.state = State()
+        self.state = State.get_instance()
 
         layout_main_vertical = QVBoxLayout()
         layout_main_vertical.setContentsMargins(0, 0, 0, 0)

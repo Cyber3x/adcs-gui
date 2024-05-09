@@ -9,7 +9,7 @@ class AngularVelocityControlTab(QWidget):
     def __init__(self, parent):
         super().__init__()
         self.parent = parent
-        self.state = State()
+        self.state = State.get_instance()
 
         self.axis_controls: dict[str, AxisAngularVelocityControl] = {}
 

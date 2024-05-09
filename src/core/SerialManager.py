@@ -2,15 +2,22 @@ import logging
 
 from PyQt6.QtSerialPort import QSerialPort, QSerialPortInfo
 
-from core import SingeltonMeta
+from core.ISerialDataListener import ISerialDataListener
+from core.ISubject import ISubject
+from core.SingletonMeta import Singelton
 
 log = logging.getLogger()
 
 
-class SerialManager(metaclass=SingeltonMeta):
+@Singelton
+class SerialManager(ISubject[ISerialDataListener]):
     def __init__(self):
+        super().__init__()
         self.serial_port = QSerialPort()
         self.data = bytearray()
+
+        self.data_listeners: list[ISerialDataListener] = []
+        log.info("SerialManager - constructor called")
 
     @staticmethod
     def get_available_ports():
@@ -49,11 +56,12 @@ class SerialManager(metaclass=SingeltonMeta):
         for line_bytes in lines[:-1]:
             try:
                 line = line_bytes.decode().strip()
+                self.notify_listeners(line)
             except UnicodeDecodeError:
                 log.error("UnicodeDecodeError for line: " + line_bytes)
                 continue
 
-            log.info("parsed line: " + line)
+            # log.info("parsed line: " + line)
 
         # Keep the incomplete line for the next iteration
         self.data = lines[-1]
@@ -86,3 +94,13 @@ class SerialManager(metaclass=SingeltonMeta):
         log.debug("Closed port: " + self.serial_port.portName())
         self.serial_port.close()
         return True
+
+    def add_listener(self, listener: ISerialDataListener):
+        self.data_listeners.append(listener)
+
+    def remove_listener(self, listener: ISerialDataListener):
+        self.data_listeners.remove(listener)
+
+    def notify_listeners(self, line):
+        for l in self.data_listeners:
+            l.on_new_line(line)
