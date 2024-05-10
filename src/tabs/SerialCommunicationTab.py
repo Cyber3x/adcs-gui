@@ -153,4 +153,5 @@ class SerialCommunicationTab(QWidget):
             self.text_area.appendPlainText("No port is open")
 
     def on_new_line(self, line: str):
-        self.update_text_area(line)
+        if self.state.is_output_raw_data.get():
+            self.update_text_area(line)

@@ -1,5 +1,5 @@
 from PyQt6.QtCore import Qt
-from PyQt6.QtWidgets import QWidget, QVBoxLayout, QLabel
+from PyQt6.QtWidgets import QWidget, QVBoxLayout, QLabel, QCheckBox
 
 from stores.GlobalStore import State
 
@@ -37,5 +37,11 @@ class DebugInfoTab(QWidget):
         self.max_data_delay_label = QLabel("Max data delay: 0ms")
         self.layout_main.addWidget(self.max_data_delay_label)
         self.state.max_data_delay.add_callback(lambda x: self.max_data_delay_label.setText(f"Max data delay: {x}ms"))
+
+        self.is_output_raw_data_checkbox = QCheckBox("Output raw data")
+        self.layout_main.addWidget(self.is_output_raw_data_checkbox)
+        self.is_output_raw_data_checkbox.clicked.connect(
+            lambda: self.state.is_output_raw_data.set(self.is_output_raw_data_checkbox.isChecked())
+        )
 
         self.setLayout(self.layout_main)

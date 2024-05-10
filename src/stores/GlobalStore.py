@@ -176,6 +176,9 @@ class State:
     skipped_packets = create_observable_value(0)
     _sum_data_delay = 0
 
+    # settings
+    is_output_raw_data = create_observable_value(False)
+
     def _add_IMU_datapoint(self, IMU_data: IMUData, x: float, y: float, z: float):
         for axis in axes:
             IMU_data.data[axis] = append_to_array(
