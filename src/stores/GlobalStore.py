@@ -220,16 +220,18 @@ class State:
         if self.last_packet_number is not None and self.last_packet_number + 1 != packet_number:
             self.skipped_packets.set(self.skipped_packets.get() + 1)
 
+        now_ns = time.time_ns()
         if self.last_packet_time is not None:
-            delay_ns = time.time_ns() - self.last_packet_time
+            delay_ns = now_ns - self.last_packet_time
             delay_ms = delay_ns / 1_000_000
             self._sum_data_delay += delay_ms
             self.average_data_delay.set(self._sum_data_delay / self.total_packets_read.get())
-            if self.total_packets_read.get() > 20:
+            if self.total_packets_read.get() > 50:
                 self.min_data_delay.set(min(delay_ms, self.min_data_delay.get()))
                 self.max_data_delay.set(max(delay_ms, self.max_data_delay.get()))
+            print(delay_ms)
 
-        self.last_packet_time = time.time_ns()
+        self.last_packet_time = now_ns
 
         self.last_packet_number = packet_number
 
