@@ -21,8 +21,8 @@ axes: Axes = ["X", "Y", "Z"]
 # there's a default value but it can be changed wiht a command
 data_interval_delay_ms = 50
 
-MAX_ANGULAR_VELOCITY = 2  # rads/sec
-MIN_ANGULAR_VELOCITY = -2  # rads/sec
+MAX_ANGULAR_VELOCITY = 100  # percent
+MIN_ANGULAR_VELOCITY = -100  # percent
 
 log = logging.getLogger()
 
@@ -177,7 +177,7 @@ class State:
     _sum_data_delay = 0
 
     # settings
-    is_output_raw_data = create_observable_value(False)
+    is_output_raw_data = create_observable_value(True)
 
     def _add_IMU_datapoint(self, IMU_data: IMUData, x: float, y: float, z: float):
         for axis in axes:
@@ -229,7 +229,7 @@ class State:
             if self.total_packets_read.get() > 50:
                 self.min_data_delay.set(min(delay_ms, self.min_data_delay.get()))
                 self.max_data_delay.set(max(delay_ms, self.max_data_delay.get()))
-            print(delay_ms)
+            # print(delay_ms)
 
         self.last_packet_time = now_ns
 

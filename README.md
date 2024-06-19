@@ -47,6 +47,8 @@ sudo rfcomm bind 0 <MAC address of your ADCS>
 
 4. You can now connect to your ADCS using the rfcomm device in the GUI
 
+### TODO: add info about the simulator and instructions on how to setup virtual serial ports
+
 ## Glosary
 * **ADCS** - Attitude Determination and Control System
 * **GUI** - Graphical User Interface
@@ -55,7 +57,9 @@ sudo rfcomm bind 0 <MAC address of your ADCS>
 * **main.py** - main file of the project
 * **/core** - utilities and functions that are not directly related to GUI
 * **/modules** - modules of the GUI. A module is a collection of multiple widgets.
+* **/stores** - files responisble for managing and saving state and model data
 * **/tabs** - Tabs of the GUI.
+* **/utils** - additional helper functions.
 * **/validators** - Validators for input fields of the GUI.
 * **/widgets** - Custom widgets of the GUI.
 

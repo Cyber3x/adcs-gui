@@ -5,6 +5,7 @@ from PyQt6.QtSerialPort import QSerialPort, QSerialPortInfo
 from core.ISerialDataListener import ISerialDataListener
 from core.ISubject import ISubject
 from core.SingletonMeta import Singelton
+from core.DataProcessingThread import DataProcessingThread
 
 log = logging.getLogger()
 
@@ -18,6 +19,9 @@ class SerialManager(ISubject[ISerialDataListener]):
 
         self.data_listeners: list[ISerialDataListener] = []
         log.info("SerialManager - constructor called")
+
+        self.data_processing_thread = DataProcessingThread()
+        self.data_processing_thread.start()
 
     @staticmethod
     def get_available_ports():
@@ -76,7 +80,7 @@ class SerialManager(ISubject[ISerialDataListener]):
 
         # TODO: remove this, this is here just for debugging info
         if is_data_written:
-            log.debug("Data written")
+            log.debug(f"Data written, data: {data}")
         else:
             log.warning("Data not written")
 
@@ -104,3 +108,7 @@ class SerialManager(ISubject[ISerialDataListener]):
     def notify_listeners(self, line):
         for l in self.data_listeners:
             l.on_new_line(line)
+        self.data_processing_thread.add_line(line)
+
+    def is_port_open(self) -> bool:
+        return self.serial_port.isOpen()

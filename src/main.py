@@ -43,8 +43,8 @@ class MainWindow(QMainWindow):
         self.serial_communication_tab.refresh_com_ports()
 
         ## debug
-        self.serial_manager = SerialManager.get_instance()
-        self.serial_manager.add_listener(SerialDataParser())
+        # self.serial_manager = SerialManager.get_instance()
+        #self.serial_manager.add_listener(SerialDataParser())
         # self.serial_manager.add_listener(SerialSpeedTester())
 
     def handle_text_changed(self):

@@ -2,7 +2,7 @@ from PyQt6.QtCore import Qt
 from PyQt6.QtGui import QAction
 from PyQt6.QtWidgets import (QWidget, QVBoxLayout, QHBoxLayout, QLabel, QSlider, QPushButton, QLineEdit)
 
-from core.communication import send_command
+from core.ADCSCommandsSender import ADCSCommandsSender
 from stores.GlobalStore import State
 from utils.saving_and_loading import save_json_data, load_json_data
 from utils.utils import create_debounce_timer, action_to_button
@@ -70,6 +70,7 @@ class _StepperControls(QWidget):
 
         self.axis_name = axis_name
         self.parent = parent
+        self.ADCSCommands_sender = ADCSCommandsSender.get_instance()
 
         self.stepper_value = getattr(State.get_instance().stepper_values, axis_name)
 
@@ -154,7 +155,7 @@ class _StepperControls(QWidget):
         self.debounce_timer = create_debounce_timer(debounce_timer_ms, self.send_stepper_value)
 
     def send_stepper_value(self):
-        send_command(f"stepper {axes.index(self.axis_name)} move {self.stepper_value.get()}")
+        self.ADCSCommands_sender.set_stepper(axes.index(self.axis_name), self.stepper_value.get())
 
     def handle_stepper_value_slider_value_changed(self, value):
         self.stepper_value.set(value / stepper_value_slider_scalar)

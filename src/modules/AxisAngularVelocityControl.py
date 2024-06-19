@@ -5,6 +5,7 @@ from PyQt6.QtWidgets import (QWidget, QVBoxLayout, QHBoxLayout,
     QLabel, QPushButton, QSlider,
     QLineEdit)
 
+from core.ADCSCommandsSender import ADCSCommandsSender
 from stores.GlobalStore import State, MIN_ANGULAR_VELOCITY, MAX_ANGULAR_VELOCITY
 from utils.utils import clamp
 
@@ -12,6 +13,7 @@ from utils.utils import clamp
 # the slider displays the value multiplied by this value but when reading it's divided by this value
 SLIDER_SCALAR_VALUE = 100
 
+axes = ["X", "Y", "Z"]
 
 class AxisAngularVelocityControl(QWidget):
     def __init__(self, axis_name: str, parent=None):
@@ -19,6 +21,7 @@ class AxisAngularVelocityControl(QWidget):
         self.axis_name = axis_name
         self.parent = parent
         self.state = State.get_instance()
+        self.ADCSCommands_sender = ADCSCommandsSender.get_instance()
 
         layout_main_vertical = QVBoxLayout()
         layout_main_vertical.setContentsMargins(0, 0, 0, 0)
@@ -40,7 +43,7 @@ class AxisAngularVelocityControl(QWidget):
         stop_flywheel_button.clicked.connect(self.handle_stop_button_clicked)
         layout_main_vertical.addWidget(stop_flywheel_button)
 
-        set_rotation_rate_label = QLabel("Set rotation rate [rad/s]")
+        set_rotation_rate_label = QLabel("Set rotation speed")
         set_rotation_rate_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
         layout_main_vertical.addWidget(set_rotation_rate_label)
 
@@ -67,7 +70,7 @@ class AxisAngularVelocityControl(QWidget):
         self.angular_velocity_slider.setOrientation(Qt.Orientation.Horizontal)
         self.angular_velocity_slider.setRange(MIN_ANGULAR_VELOCITY * SLIDER_SCALAR_VALUE,
                                               MAX_ANGULAR_VELOCITY * SLIDER_SCALAR_VALUE)
-        self.angular_velocity_slider.setSingleStep(1)
+        self.angular_velocity_slider.setSingleStep(1000)
         self.angular_velocity_slider.setTickPosition(QSlider.TickPosition.TicksAbove)
         self.angular_velocity_slider.valueChanged.connect(self.handle_rotation_rate_slider_change)
         getattr(self.state.dc_motor_values.angular_velocity_control["values"], axis_name).add_callback(
@@ -115,10 +118,11 @@ class AxisAngularVelocityControl(QWidget):
 
         self.dc_motor_velocity_input.setText(str(new_angular_velocity))
 
-        print(f"set dc motor of axis {self.axis_name} to {new_angular_velocity} rad/s")
         getattr(self.state.dc_motor_values.angular_velocity_control["values"], self.axis_name).set(
             new_angular_velocity
         )
+        self.ADCSCommands_sender.set_motor_speed(axes.index(self.axis_name), new_angular_velocity)
+
 
     def handle_stop_button_clicked(self):
         getattr(self.state.dc_motor_values.angular_velocity_control["values"], self.axis_name).set(0)
